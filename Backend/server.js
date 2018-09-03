@@ -1,14 +1,28 @@
-const http = require('http');
+const express = require('express');
+const session = require('express-session');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+const cors = require('cors');
 
-const hostname = '127.0.0.1';
-const port = 4000;
+const app = express();
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(cors({
+  origin: ['http://localhost:3000'],
+  credentials: true // enable set cookie
+}));
+app.use(session({
+  secret: 'secret string',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: false
+  },
+  cookieName: 'session',
+}));
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
-});
+const port = 3001;
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+app.listen(port, () => {
+  console.log(`listening to port: ${port}`);
 });
