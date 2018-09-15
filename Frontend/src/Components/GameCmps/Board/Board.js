@@ -4,27 +4,23 @@ import CssModules from 'react-css-modules';
 import { connect } from "react-redux";
 import { updateBoard } from '../../../store/Actions';
 import { changeDirection } from '../../../store/Actions';
-import { addNode } from '../../../store/Actions';
-// import { startInterval } from '../../../store/Actions';
 import SnakeService from '../../../Services/SnakeService';
 import BoardService from '../../../Services/BoardService';
 import CtxService from '../../../Services/CtxService';
-import { setInterval } from 'timers';
 import FoodService from '../../../Services/FoodService';
+const CANVAS_HEIGHT = parseInt(window.innerHeight / 15, 10) * 10;
+const CANVAS_WIDTH = parseInt(window.innerWidth / 15, 10) * 10;
 
 const mapDispatchToProps = dispatch => {
     return {
         updateBoard: board => dispatch(updateBoard(board)),
         changeDirection: snake => dispatch(changeDirection(snake)),
-        startInterval: interval => dispatch(changeDirection(interval)),
-        addNode: newNode => dispatch(addNode(newNode))
     }
 }
 const mapStateToProps = state => {
     return {
         board: state.board,
         snake: state.snake,
-        gameInterval: state.gameInterval
     };
 };
 
@@ -32,43 +28,35 @@ class Board extends Component {
     constructor(props) {
         super(props);
         this.interval = null;
-        this.counter = 0;
+        this.shouldStart = true;
+        this.lastSnakeHeadPos = null;
+        this.nodes = [];
         this.state = {
-            time: false,
+            time: 0,
             ctx: null,
             canvasSettings: {
-                width: parseInt(window.innerWidth / 2, 10),
-                height: parseInt(window.innerHeight / 2, 10)
+                width: CANVAS_WIDTH,
+                height: CANVAS_HEIGHT
             },
             snake: {
                 color: 'red',
                 width: 10,
                 velocity: 2,
                 direction: 'left',
-                position: {
-                    x: null,
-                    y: null
-                },
-                nodes: [],
-                animation: null
             },
             food: {
                 color: 'black',
                 aspectRatio: 10,
-                position: {
-                    x: null,
-                    y: null
-                },
-                animation: null,
             },
         }
         this.canvas = React.createRef();
     }
 
     buildBoard = () => {
-        let board = BoardService.getbuildedBoard(this.state.canvasSettings.width, this.state.canvasSettings.height);
-        board = BoardService.getBoardWithFoodAndSnake(board);
-        this.props.updateBoard(board);
+        let board = BoardService.getbuiltBoard(this.state.canvasSettings.width, this.state.canvasSettings.height);
+        let boardAndNodes = BoardService.getBoardWithFoodAndSnake(board);
+        this.nodes = boardAndNodes.nodes;
+        this.props.updateBoard(boardAndNodes.board);
     }
     renderBoard = board => {
         let positions = BoardService.getPositions(board);
@@ -84,6 +72,12 @@ class Board extends Component {
     removeSnakeHead = snakeHeadPos => {
         let ctx = this.canvas.current.getContext("2d");
         ctx.clearRect(...CtxService.clearRect(snakeHeadPos));
+    }
+    removeNodes = snakeNodes => {
+        let ctx = this.canvas.current.getContext("2d");
+        snakeNodes.forEach(node => {
+            ctx.clearRect(...CtxService.clearRect(node));
+        })
     }
     renderNodes(snakeNodes) {
         if (snakeNodes.length) {
@@ -107,6 +101,7 @@ class Board extends Component {
     }
     moveSnake = board => {
         let positions = BoardService.getPositions(board);
+        this.lastSnakeHeadPos = positions.snakeHeadPos;
         this.removeSnakeHead(positions.snakeHeadPos);
         board = BoardService.getBoardMovedSnake(board, this.props.snake);
         return board;
@@ -115,56 +110,51 @@ class Board extends Component {
         board = FoodService.moveFood(board);
         return board;
     }
-    moveNodes = board => {
-        let positions = BoardService.getPositions(board);
-        console.log(positions);
-        //         snakeHeadPos
-        // :
-        // {x: 4, y: 19}
-        // snakeNodes
-        // :
-        // Array(1)
-        // 0
-        // :
-        // {x: 4, y: 20}
-    }
-    addNode = board => {
-        let positions = BoardService.getPositions(board);
-        let nodePos = SnakeService.addNode(positions.snakeHeadPos, this.props.snake.direction);
-        board = BoardService.addNewNode(nodePos, board);
-        this.props.addNode(nodePos);
+    moveNodes = (board) => {
+        this.removeNodes(this.nodes);
+        this.nodes = SnakeService.updateNodes(this.nodes, this.lastSnakeHeadPos);
+        board = BoardService.getBoardMovedNodes(board, this.nodes);
         return board;
     }
     checkIfFoodEaten = board => {
         if (BoardService.checkIfFoodEaten(board)) {
-            board = this.addNode(board);
-            return this.moveFood(board);
+            this.nodes.push('newNode');
+            board = this.moveFood(board)
+            return board;
         }
         return board;
     }
+    startOver = () => {
+        alert('gameOver');
+        window.location.reload();
+    }
     runGame = board => {
-        board = this.moveSnake(board);
+        if (SnakeService.isOutOfBounds(board, this.props.snake) ||
+            SnakeService.isTouchedItSelf(board, this.props.snake)) {
+            this.stopGame();
+            this.startOver();
+            return;
+        }
         board = this.checkIfFoodEaten(board);
-        this.moveNodes(board);
+        board = this.moveSnake(board);
+        board = this.moveNodes(board, this.nodes);
         this.props.updateBoard(board);
         this.setState({ time: this.state.time + 100 });
     }
     init = () => {
+        document.addEventListener("keydown", this.handleMove, false);
         this.buildBoard();
     }
     startGame = board => {
         this.interval = setInterval(this.runGame, 70, board);
     }
-    stop = () => {
-        clearInterval(this.interval);
-    }
-    componentDidMount() {
-        document.addEventListener("keydown", this.handleMove, false);
+    stopGame = () => {
+        clearInterval(this.interval._id);
     }
     shouldComponentUpdate(nextProps) {
-        if (!this.counter) {
+        if (this.shouldStart) {
             this.startGame(nextProps.board);
-            this.counter++;
+            this.shouldStart = false;
         }
         this.renderBoard(nextProps.board);
         return true;
@@ -177,7 +167,6 @@ class Board extends Component {
             <div styleName="board">
                 <p>this is board</p>
                 <button onClick={this.init}>start</button>
-                <button onClick={this.stop}>stop</button>
                 <canvas styleName="canvas-board" ref={this.canvas}
                     width={this.state.canvasSettings.width} height={this.state.canvasSettings.height} />
             </div>

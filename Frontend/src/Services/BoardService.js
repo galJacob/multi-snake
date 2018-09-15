@@ -1,7 +1,9 @@
 import Utils from '../Utils';
 const PX_CLEAR = 0.001;
 
-function getbuildedBoard(canvasWidth, canvasHeight) {
+function getbuiltBoard(canvasWidth, canvasHeight) {
+console.log(canvasWidth);
+
     let xAxisCells = (parseInt(canvasWidth / 10, 10) * 10) / 10;
     let yAxisCells = (parseInt(canvasHeight / 10, 10) * 10) / 10;
     let board = [];
@@ -77,6 +79,24 @@ function getBoardMovedSnake(board, snake) {
     }
     return board;
 }
+function getBoardMovedFirstNode(board, lastSnakeHeadPos) {
+    for (let y = 0; y < board.length; y++) {
+        for (let x = 0; x < board[y].length; x++) {
+            if (board[y][x].isSnakeNode) {
+                board[y][x].isSnakeNode = false;
+            }
+        }
+    }
+    board[lastSnakeHeadPos.y][lastSnakeHeadPos.x].isSnakeNode = true;
+    return board;
+}
+function getBoardAllNodes(board, nodes) {
+    console.log(nodes);
+    console.log(nodes);
+
+
+    return board;
+}
 function getClearSnakeCtx(currPos, snake) {
     return [currPos.x * 10 - PX_CLEAR, currPos.y * 10 - PX_CLEAR, snake.width + PX_CLEAR * 2,
     (snake.nodes.length + 1) * 10 + PX_CLEAR * 2];
@@ -112,13 +132,29 @@ function getBoardWithFoodAndSnake(board) {
         foodX = Utils.getRandNum(board[0].length);
         foodY = Utils.getRandNum(board.length);
     }
+    let nodes = [{ y: snakeY, x: snakeX - 1 }, { y: snakeY, x: snakeX - 2 }];
     board[snakeY][snakeX].isSnakeHead = true;
+    board[snakeY][snakeX - 1].isSnakeNode = true;
+    board[snakeY][snakeX - 2].isSnakeNode = true;
     board[foodY][foodX].isFood = true;
-    // console.log(foodX, foodY);
-    // console.log(snakeX, snakeY);
+    return { board, nodes };
+}
+function getBoardMovedNodes(board, nodes) {
+    for (let y = 0; y < board.length; y++) {
+        for (let x = 0; x < board[y].length; x++) {
+            board[y][x].isSnakeNode = false;
+        }
+    }
+    for (let y = 0; y < board.length; y++) {
+        for (let x = 0; x < board[y].length; x++) {
+            nodes.forEach(node => {
+                if (node.x === x && node.y === y)
+                    board[y][x].isSnakeNode = true;
+            });
+        }
+    }
     return board;
 }
-
 function _checkAvailabeSpace(snake, food, possibleFoodPos) {
     // if (snake.direction === 'left' || snake.direction === 'right') { }
     // for (let x = snake.position.x; x <= snake.length + snake.position.x; x++) {
@@ -127,10 +163,14 @@ function _checkAvailabeSpace(snake, food, possibleFoodPos) {
     //     }
     // }
 }
+
 export default {
     checkIfFoodEaten,
+    getBoardAllNodes,
+    getBoardMovedNodes,
+    getBoardMovedFirstNode,
     addNewNode,
-    getbuildedBoard,
+    getbuiltBoard,
     getPositions,
     getBoardMovedSnake,
     getFillFoodCtx,

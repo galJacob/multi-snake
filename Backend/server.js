@@ -3,6 +3,7 @@ const session = require('express-session');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 const cors = require('cors');
+const addUserRoutes = require('./routes/UserRoutes');
 
 const app = express();
 app.use(bodyParser.json());
@@ -16,13 +17,15 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: false
+    secure: true
   },
   cookieName: 'session',
 }));
 
-const port = 3001;
+addUserRoutes(app);
 
+
+const port = 4000;
 app.listen(port, () => {
   console.log(`listening to port: ${port}`);
 });

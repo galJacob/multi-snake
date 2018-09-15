@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import Home from './Pages/Home/Home';
 import Game from './Pages/Game/Game';
 
+
 class Routes extends Component {
     state = {}
     render() {
