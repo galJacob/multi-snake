@@ -10,6 +10,7 @@ class Header extends Component {
             <div styleName="header">
                 <Link to="/">home</Link>
                 <Link to="/game">game</Link>
+                <Link to="/profile">profile</Link>
             </div>
         );
     }

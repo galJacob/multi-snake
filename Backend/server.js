@@ -1,31 +1,28 @@
-const express = require('express');
-const session = require('express-session');
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
+const express = require('express')
+const bodyParser = require('body-parser')
+const session = require('express-session')
 const cors = require('cors');
-const addUserRoutes = require('./routes/UserRoutes');
-
+const cookieParser = require('cookie-parser');
 const app = express();
-app.use(bodyParser.json());
-app.use(cookieParser());
 app.use(cors({
   origin: ['http://localhost:3000'],
-  credentials: true // enable set cookie
+  credentials: true
 }));
+app.use(bodyParser.json());
+app.use(cookieParser('secret string'));
 app.use(session({
   secret: 'secret string',
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: true
-  },
-  cookieName: 'session',
+    secure: false,
+    maxAge: 100000000000000
+  }
 }));
 
+const addUserRoutes = require('./routes/UserRoutes');
 addUserRoutes(app);
-
-
-const port = 4000;
+const port = 2000;
 app.listen(port, () => {
   console.log(`listening to port: ${port}`);
 });

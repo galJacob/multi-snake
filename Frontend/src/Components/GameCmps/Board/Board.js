@@ -19,8 +19,8 @@ const mapDispatchToProps = dispatch => {
 }
 const mapStateToProps = state => {
     return {
-        board: state.board,
-        snake: state.snake,
+        board: state.gameReducer.board,
+        snake: state.gameReducer.snake,
     };
 };
 

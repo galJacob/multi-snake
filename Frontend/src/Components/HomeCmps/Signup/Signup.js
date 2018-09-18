@@ -16,7 +16,13 @@ class Signup extends Component {
             username: this.state.username,
             password: this.state.password
         }
-        UserService.addUser(user);
+        UserService.addUser(user)
+            .then(user => {
+
+            })
+    }
+    test = () => {
+        UserService.query();
     }
     handleInput = (ev, type) => {
         switch (type) {
@@ -38,6 +44,7 @@ class Signup extends Component {
             <div styleName="signup">
                 <h1>Welcome to Multi Snake</h1>
                 <p>Enjoy with friends together!</p>
+                <button onClick={this.test}>test</button>
                 <form onSubmit={this.onSubmit}>
                     <input onInput={ev => this.handleInput(ev, 'username')} value={this.state.username} placeholder="Username" />
                     <input onInput={ev => this.handleInput(ev, 'password')} value={this.state.password} type="password" placeholder="Password" />
