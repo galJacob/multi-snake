@@ -1,0 +1,17 @@
+.login {
+    background-color: gray;
+    margin: 0 auto;
+    width: 30vw;
+    height: 70vh;
+    h1 {
+        text-align: center;
+    }
+}
+form {
+    display: flex;
+    flex-direction: column;
+    padding: 0 3rem;
+    *{
+        margin: 0.5rem 0;
+    }
+}

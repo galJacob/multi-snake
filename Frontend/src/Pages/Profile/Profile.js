@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import CssModules from 'react-css-modules';
 import styles from './Profile.scss';
-
+// import connect
 class Profile extends Component {
-    state = {
-
+    constructor(props) {
+        super(props);
+        this.state = {}
     }
     render() {
         return (

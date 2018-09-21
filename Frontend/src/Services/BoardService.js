@@ -2,8 +2,6 @@ import Utils from '../Utils';
 const PX_CLEAR = 0.001;
 
 function getbuiltBoard(canvasWidth, canvasHeight) {
-console.log(canvasWidth);
-
     let xAxisCells = (parseInt(canvasWidth / 10, 10) * 10) / 10;
     let yAxisCells = (parseInt(canvasHeight / 10, 10) * 10) / 10;
     let board = [];
