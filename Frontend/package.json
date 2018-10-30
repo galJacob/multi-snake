@@ -43,6 +43,7 @@
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.6.0",
     "redux-promise-middleware": "^5.1.1",
+    "redux-socket.io": "^1.4.0",
     "redux-thunk": "^2.3.0",
     "resolve": "1.6.0",
     "sass-loader": "^7.1.0",

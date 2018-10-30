@@ -1,11 +1,11 @@
-import { UPDATE_BOARD } from '../Action-types';
-import { CHAGE_DIRECTION } from '../Action-types';
+import {SEND_BOARD_SNAKE_TO_CLIENT } from '../Actions/FromServer/TypesFromServer';
 
 const initialState = {
     board: [],
     snake: {
         color: 'red',
         width: 10,
+        lastHeadPos: null,
         velocity: 2,
         direction: 'right',
         nodes: [],
@@ -14,12 +14,10 @@ const initialState = {
 
 const gameReducer = (state = initialState, action) => {
     switch (action.type) {
-        case UPDATE_BOARD:
-            return { ...state, board: action.payload };
-        case CHAGE_DIRECTION:
+        case SEND_BOARD_SNAKE_TO_CLIENT:
             let snake = Object.assign({}, state.snake);
-            snake.direction = action.payload;
-            return { ...state, snake };
+            snake.nodes = action.payload.nodes;
+            return { ...state, board: action.payload.board, snake };
         default:
             return state;
     }

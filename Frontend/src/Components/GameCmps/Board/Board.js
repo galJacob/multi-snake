@@ -2,47 +2,40 @@ import React, { Component } from 'react';
 import styles from './Board.scss';
 import CssModules from 'react-css-modules';
 import { connect } from "react-redux";
-import { updateBoard } from '../../../store/Actions';
-import { changeDirection } from '../../../store/Actions';
-import SnakeService from '../../../Services/SnakeService';
+import { changeDirection } from '../../../store/Actions/ToServer/ActionsToServer';
+import { startGame } from '../../../store/Actions/ToServer/ActionsToServer';
+import { nextMove } from '../../../store/Actions/ToServer/ActionsToServer';
 import BoardService from '../../../Services/BoardService';
 import CtxService from '../../../Services/CtxService';
-import FoodService from '../../../Services/FoodService';
 const CANVAS_HEIGHT = parseInt(window.innerHeight / 15, 10) * 10;
 const CANVAS_WIDTH = parseInt(window.innerWidth / 15, 10) * 10;
 
 const mapDispatchToProps = dispatch => {
     return {
-        updateBoard: board => dispatch(updateBoard(board)),
         changeDirection: snake => dispatch(changeDirection(snake)),
+        startGame: (playingRoom, canvasWidth, canvasHeight) => dispatch(startGame(playingRoom, canvasWidth, canvasHeight)),
+        nextMove: (board, playingRoom, snake) => dispatch(nextMove(board, playingRoom, snake))
     }
 }
 const mapStateToProps = state => {
     return {
         board: state.gameReducer.board,
         snake: state.gameReducer.snake,
+        forbiddenRoom: state.userReducer.forbiddenRoom,
+        players: state.userReducer.playersWithRooms
     };
 };
 
 class Board extends Component {
     constructor(props) {
         super(props);
-        this.interval = null;
         this.shouldStart = true;
-        this.lastSnakeHeadPos = null;
-        this.nodes = [];
         this.state = {
             time: 0,
             ctx: null,
             canvasSettings: {
                 width: CANVAS_WIDTH,
                 height: CANVAS_HEIGHT
-            },
-            snake: {
-                color: 'red',
-                width: 10,
-                velocity: 2,
-                direction: 'left',
             },
             food: {
                 color: 'black',
@@ -51,17 +44,10 @@ class Board extends Component {
         }
         this.canvas = React.createRef();
     }
-
-    buildBoard = () => {
-        let board = BoardService.getbuiltBoard(this.state.canvasSettings.width, this.state.canvasSettings.height);
-        let boardAndNodes = BoardService.getBoardWithFoodAndSnake(board);
-        this.nodes = boardAndNodes.nodes;
-        this.props.updateBoard(boardAndNodes.board);
-    }
     renderBoard = board => {
         let positions = BoardService.getPositions(board);
         this.renderSnakeHead(positions.snakeHeadPos);
-        this.renderFood(positions.foodPos);
+        this.renderFoods(positions.foods);
         this.renderNodes(positions.snakeNodes);
     }
     renderSnakeHead = snakeHeadPos => {
@@ -88,85 +74,55 @@ class Board extends Component {
             })
         }
     }
-    renderFood = foodPos => {
+    renderFoods = foods => {
         let ctx = this.canvas.current.getContext("2d");
-        ctx.fillStyle = this.state.food.color;
-        ctx.fillRect(...CtxService.renderRect(foodPos))
+        foods.forEach(food => {
+            console.log(food);
+            
+            let foodPos = food.pos;
+            ctx.fillStyle = food.color;
+            ctx.fillRect(...CtxService.renderRect(foodPos))
+        });
     }
     handleMove = ev => {
-        let direction = SnakeService.getDirection(ev.key, this.props.snake.direction);
-        let snake = Object.assign({}, this.props.snake);
-        snake.direction = direction;
-        this.props.changeDirection(direction);
+        this.props.changeDirection(ev.key);
     }
-    moveSnake = board => {
-        let positions = BoardService.getPositions(board);
-        this.lastSnakeHeadPos = positions.snakeHeadPos;
-        this.removeSnakeHead(positions.snakeHeadPos);
-        board = BoardService.getBoardMovedSnake(board, this.props.snake);
-        return board;
+    executeNextMove = (board, playingRoom, snake) => {
+        this.props.nextMove(board, playingRoom, snake);
     }
-    moveFood = board => {
-        board = FoodService.moveFood(board);
-        return board;
+    clearBoard = () => {
+        let ctx = this.canvas.current.getContext("2d");
+        ctx.clearRect(...CtxService.clearRect('node'));
     }
-    moveNodes = (board) => {
-        this.removeNodes(this.nodes);
-        this.nodes = SnakeService.updateNodes(this.nodes, this.lastSnakeHeadPos);
-        board = BoardService.getBoardMovedNodes(board, this.nodes);
-        return board;
-    }
-    checkIfFoodEaten = board => {
-        if (BoardService.checkIfFoodEaten(board)) {
-            this.nodes.push('newNode');
-            board = this.moveFood(board)
-            return board;
-        }
-        return board;
-    }
-    startOver = () => {
-        alert('gameOver');
-        window.location.reload();
-    }
-    runGame = board => {
-        if (SnakeService.isOutOfBounds(board, this.props.snake) ||
-            SnakeService.isTouchedItSelf(board, this.props.snake)) {
-            this.stopGame();
-            this.startOver();
-            return;
-        }
-        board = this.checkIfFoodEaten(board);
-        board = this.moveSnake(board);
-        board = this.moveNodes(board, this.nodes);
-        this.props.updateBoard(board);
-        this.setState({ time: this.state.time + 100 });
-    }
-    init = () => {
-        document.addEventListener("keydown", this.handleMove, false);
-        this.buildBoard();
-    }
-    startGame = board => {
-        this.interval = setInterval(this.runGame, 70, board);
-    }
-    stopGame = () => {
-        clearInterval(this.interval._id);
-    }
-    shouldComponentUpdate(nextProps) {
+    shouldStartGame = (board, forbiddenRoom, snake) => {
         if (this.shouldStart) {
-            this.startGame(nextProps.board);
+            this.executeNextMove(board, forbiddenRoom, snake);
             this.shouldStart = false;
         }
-        this.renderBoard(nextProps.board);
+    }
+    shouldComponentUpdate(nextProps) {
+        let { board, forbiddenRoom, snake } = nextProps;
+        if (!board.length) return false;
+        this.clearBoard();
+        this.renderBoard(board);
+        this.shouldStartGame(board, forbiddenRoom, snake);
         return true;
     }
     componentWillUnmount() {
         document.removeEventListener("keydown", this.handleMove, false);
     }
+    init = () => {
+        document.addEventListener("keydown", this.handleMove, false);
+        this.props.startGame(this.props.forbiddenRoom, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+    componentDidMount() {
+        this.init();
+    }
     render() {
         return (
             <div styleName="board">
                 <p>this is board</p>
-                <button onClick={this.init}>start</button>
+                {console.log(this.props.players)}
                 <canvas styleName="canvas-board" ref={this.canvas}
                     width={this.state.canvasSettings.width} height={this.state.canvasSettings.height} />
             </div>

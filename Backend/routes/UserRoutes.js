@@ -22,6 +22,7 @@ function addUserRoutes(app) {
             }
         }
     })
+    
     app.get(`${USER_URL}/logOut`, (req, res) => {
         req.session.user = null;
         res.json('logged out');

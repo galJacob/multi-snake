@@ -3,11 +3,10 @@ import { logger } from 'redux-logger';
 import thunk from 'redux-thunk';
 import promise from 'redux-promise-middleware';
 import rootReducer from './Reducers/rootReducer';
-
-const middleware = applyMiddleware(promise(), thunk, logger);
+import createSocketIoMiddleware from 'redux-socket.io';
+import io from 'socket.io-client';
+let socket = io('http://localhost:2000');
+let socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
+const middleware = applyMiddleware(promise(), thunk, socketIoMiddleware,logger);
 const store = createStore(rootReducer, middleware);
-
-// store.dispatch({
-//     type: CHECK_IF_USER,
-// })
 export default store; 

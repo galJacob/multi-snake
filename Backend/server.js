@@ -6,16 +6,16 @@ const cookieParser = require('cookie-parser');
 const MongoStore = require('connect-mongo')(session);
 const http = require('http');
 const socketIo = require('socket.io');
+const addSocketRoutes = require('./services/SocketRoutes');
 const app = express();
 const MONGO_SESSION_URL = 'mongodb://galAdmin:givemepie3.14@ds149672.mlab.com:49672/multi-snake';
 
 const server = http.createServer(app);
 const io = socketIo(server);
 
-io.on('connection', function (socket) {
-  socket.on('chat join', data => {
-    console.log(data);
-  });
+io.on('connection', socket => {
+  console.log('user connected');
+  addSocketRoutes(socket, io);
 });
 
 app.use(cors({

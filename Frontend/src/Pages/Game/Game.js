@@ -2,17 +2,17 @@ import React, { Component } from 'react';
 import CssModules from 'react-css-modules';
 import styles from './Game.scss';
 import Board from '../../Components/GameCmps/Board/Board';
+import ScoreBoard from '../../Components/GameCmps/ScoreBoard/ScoreBoard'
+
 
 class Game extends Component {
     state = {}
-    componentDidMount() {
 
-    }
     render() {
         return (
             <div styleName="game">
-                <h1>Game Page</h1>
-                <Board />
+                    <Board />
+                <ScoreBoard />
             </div>
         );
     }

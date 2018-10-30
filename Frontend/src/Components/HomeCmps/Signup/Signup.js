@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import CssModules from 'react-css-modules';
 import styles from './Signup.scss';
 import { connect } from "react-redux";
-import { addUser } from '../../../store/Actions';
+import { addUser } from '../../../store/Actions/Client/ClientActions';
 
 const mapDispatchToProps = dispatch => {
     return {

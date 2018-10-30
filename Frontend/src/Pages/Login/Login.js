@@ -3,7 +3,7 @@ import CssModules from 'react-css-modules';
 import styles from './Login.scss';
 // import UserService from '../../../Services/UserService';
 import { connect } from "react-redux";
-import { login } from '../../store/Actions';
+import { login } from '../../store/Actions/Client/ClientActions';
 
 const mapDispatchToProps = dispatch => {
     return {

@@ -1,0 +1,20 @@
+.room-preview {
+    h1 {
+        text-align: center;
+    }
+}
+
+li.room-preview {
+    background-color: gray;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    &:hover {
+        color: white;
+    }
+}
+
+.forbidden-room {
+    background-color: gray;
+    margin-bottom: 1rem;
+    color: red;
+}

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import CssModules from 'react-css-modules';
 import styles from './Header.scss';
 import { connect } from 'react-redux';
-import { logOut } from '../../store/Actions';
+import { logOut } from '../../store/Actions/Client/ClientActions';
+import { login } from '../../store/Actions/Client/ClientActions';
 
 const mapDispatchToProps = dispatch => {
     return {
-        logOut: () => dispatch(logOut())
+        logOut: () => dispatch(logOut()),
+        login: () => dispatch(login())
     }
 }
 
@@ -18,8 +20,10 @@ const mapStateToProps = state => {
 };
 
 class Header extends Component {
-    state = {
-
+    constructor(props) {
+        super(props);
+        this.state = {}
+        props.login();
     }
     logOut = ev => {
         ev.preventDefault();
@@ -28,7 +32,7 @@ class Header extends Component {
                 this.props.history.push('/');
             })
     }
-    
+
     render() {
         return (
             <React.Fragment>
