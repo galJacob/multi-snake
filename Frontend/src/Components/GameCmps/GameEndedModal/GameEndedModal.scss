@@ -1,0 +1,14 @@
+.game-ended-modal{
+    background-color: chocolate;
+    width: 50vw;
+    height: 60vh;
+}
+.game-ended-modal-container{
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(102,102,102,0.6);
+    width: 100vw;
+    height: 100vh;
+}

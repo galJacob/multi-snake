@@ -27,15 +27,17 @@ function moveFood(board, food) {
                 positions.nodes.push({ y, x });
         }
     }
-    // TODO:check snake nodes also
     let newX = Utils.getRandNum(board[0].length);
     let newY = Utils.getRandNum(board.length);
     positions.foods.forEach(food => {
-        while ((food.x === newX && food.y === newY) ||
-            positions.snakeHead.y === newY && positions.snakeHead.x === newX) {
-            newX = Utils.getRandNum(board[0].length);
-            newY = Utils.getRandNum(board.length);
-        }
+        positions.nodes.forEach(node => {
+            while ((food.x === newX && food.y === newY) ||
+                (positions.snakeHead.y === newY && positions.snakeHead.x === newX) ||
+                (node.x === newX && node.y === newY)) {
+                newX = Utils.getRandNum(board[0].length);
+                newY = Utils.getRandNum(board.length);
+            }
+        })
     })
     board[newY][newX].isFood = { userSocket: food.userSocket, color: food.color };
     return board;
@@ -129,18 +131,22 @@ function checkIfFoodEatenAndGetPos(board, direction) {
     switch (direction) {
         case 'up':
             return foods.find(food => {
-                return board[food.pos.y - 1][food.pos.x].isSnakeHead
+                if (food.pos.y === board.length - 1) return false;
+                return board[food.pos.y + 1][food.pos.x].isSnakeHead
             })
         case 'down':
             return foods.find(food => {
-                return board[food.pos.y + 1][food.pos.x].isSnakeHead
+                if (!food.pos.y) return false;
+                return board[food.pos.y - 1][food.pos.x].isSnakeHead
             })
         case 'left':
             return foods.find(food => {
+                if (food.pos.x === board[0].length - 1) return false;
                 return board[food.pos.y][food.pos.x + 1].isSnakeHead
             })
         case 'right':
             return foods.find(food => {
+                if (!food.pos.x) return false;
                 return board[food.pos.y][food.pos.x - 1].isSnakeHead
             })
         default:

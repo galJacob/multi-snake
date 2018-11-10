@@ -1,4 +1,4 @@
-const { ROOM_ENTERED, FORBID_ROOM, SEND_BOARD_SNAKE_TO_CLIENT,UPDATE_SCORES } = require('./SocketEventsToclient');
+const { ROOM_ENTERED, FORBID_ROOM, SEND_BOARD_SNAKE_TO_CLIENT, UPDATE_SCORES,SEND_GAME_OVER } = require('./SocketEventsToclient');
 
 function checkIfRoomExist(io, socket, action) {
     var roomNum = `${action.payload.roomNum}`;
@@ -7,7 +7,11 @@ function checkIfRoomExist(io, socket, action) {
     isExist = room ? true : false;
     return isExist;
 }
-
+function sendGameOver(io, playingRoom) {
+    io.to(playingRoom).emit('action', {
+        type: SEND_GAME_OVER
+    });
+}
 function enterRoom(io, socket, action) {
     var roomNum = `${action.payload.roomNum}`;
     let payload = { roomNum, user: { score: 0, username: action.payload.user, userSocket: socket.id } };
@@ -36,7 +40,6 @@ function checkIfSocketInRoom(io, socket, action) {
 function checkIfSocketPickedRoom(io, socket, action) {
     var roomNum = `${action.payload.roomNum}`;
     var rooms = io.sockets.adapter.rooms;
-    // console.log('wrongggggg', io.sockets.adapter.rooms[socket.id]);
     let isSocketInRoom = false;
     // TODO:fix the bug when one joins a room and then clicks on another
     // and then cant enter the previous room
@@ -83,5 +86,6 @@ module.exports = {
     decideWhoBuildBoard,
     getToEmitSocket,
     sendBoardAndSnakeToClient,
-    updateScores
+    updateScores,
+    sendGameOver
 }

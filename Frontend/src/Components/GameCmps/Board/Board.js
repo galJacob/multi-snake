@@ -22,7 +22,7 @@ const mapStateToProps = state => {
         board: state.gameReducer.board,
         snake: state.gameReducer.snake,
         forbiddenRoom: state.userReducer.forbiddenRoom,
-        players: state.userReducer.playersWithRooms
+        players: state.userReducer.playersWithRooms,
     };
 };
 
@@ -78,7 +78,7 @@ class Board extends Component {
         let ctx = this.canvas.current.getContext("2d");
         foods.forEach(food => {
             console.log(food);
-            
+
             let foodPos = food.pos;
             ctx.fillStyle = food.color;
             ctx.fillRect(...CtxService.renderRect(foodPos))
@@ -121,8 +121,7 @@ class Board extends Component {
     render() {
         return (
             <div styleName="board">
-                <p>this is board</p>
-                {console.log(this.props.players)}
+                
                 <canvas styleName="canvas-board" ref={this.canvas}
                     width={this.state.canvasSettings.width} height={this.state.canvasSettings.height} />
             </div>

@@ -1,4 +1,4 @@
-import {SEND_BOARD_SNAKE_TO_CLIENT } from '../Actions/FromServer/TypesFromServer';
+import { SEND_BOARD_SNAKE_TO_CLIENT, SEND_GAME_OVER } from '../Actions/FromServer/TypesFromServer';
 
 const initialState = {
     board: [],
@@ -10,10 +10,13 @@ const initialState = {
         direction: 'right',
         nodes: [],
     },
+    isGameEnded: false
 };
 
 const gameReducer = (state = initialState, action) => {
     switch (action.type) {
+        case SEND_GAME_OVER:
+            return { ...state, isGameEnded: true };
         case SEND_BOARD_SNAKE_TO_CLIENT:
             let snake = Object.assign({}, state.snake);
             snake.nodes = action.payload.nodes;

@@ -36,18 +36,17 @@ module.exports = (socket, io) => {
                 var interval = setInterval(() => {
                     let shouldAddNode = false;
                     let lastSnakeHeadPos = {};
+                    // game over:
                     if (SnakeService.isOutOfBounds(gBoard, gDirection) ||
                         SnakeService.isTouchedItSelf(gBoard, gDirection, gNodes)) {
-                        //TODO: emit event that game ended
+                        SocketService.sendGameOver(io, action.payload.playingRoom);
                         clearInterval(interval);
                         return;
                     }
-                    // TODO: deal with sides
                     let food = BoardService.checkIfFoodEatenAndGetPos(gBoard, gDirection);
                     if (food) {
                         console.log(food);
                         SocketService.updateScores(io, food.userSocket, action.payload.playingRoom);
-                        // TODO:emit event of score
                         gBoard = BoardService.moveFood(gBoard, food);
                         shouldAddNode = true;
                     }
